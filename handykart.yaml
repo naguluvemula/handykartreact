@@ -1,0 +1,46 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: handykartreactapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: handykartreactapp
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5 
+  template:
+    metadata:
+      labels:
+        app: handykartreactapp
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: handykartreactapp
+        image: myterraformacr.azurecr.io/quarkus/handykartreactapp:latest
+        ports:
+        - containerPort: 3000
+        resources:
+          requests:
+            cpu: 250m
+          limits:
+            cpu: 500m
+        env:
+        - name: REDIS
+          value: "handykartreactapp"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: handykartreactapp
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 3000
+  selector:
+    app: handykartreactapp
